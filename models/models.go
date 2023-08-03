@@ -1,5 +1,7 @@
 package models
 
+import "github.com/go-playground/validator/v10"
+
 type Karyawan struct {
 	Id     int    `json:"id" db:"id"`
 	Nama   string `json:"name" db:"name" validate:"required"`
@@ -13,9 +15,6 @@ type Respons struct {
 	//Data    []Karyawan
 }
 
-func ResponMessage() {
-	// respon := Respons
-	// 	Message: "Sukses menjalankan query",
-	// 	Status:  true,
-
+type CustomValidator struct {
+	validator *validator.Validate
 }
