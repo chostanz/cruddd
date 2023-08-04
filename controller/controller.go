@@ -4,28 +4,53 @@ import (
 	"net/http"
 	"projectcrud/models"
 	"projectcrud/service"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetAllUser(c echo.Context) error {
-	users, _ := service.Getusers(c)
-
+	users, err := service.Getusers()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	return c.JSON(http.StatusOK, users)
 }
 
 func GetSpecUser(c echo.Context) error {
-	user, _ := service.GetSpesificUser(c)
+	id, err := strconv.Atoi(c.Param("id"))
+
+	var user models.Karyawan
+
+	user, err = service.GetSpesificUser(user, id)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	return c.JSON(http.StatusOK, user)
 }
 
 func UpdateUsers(c echo.Context) error {
-	reqBody, _ := service.UpdateUser(c)
+	id, err := strconv.Atoi(c.Param("id"))
+
+	var reqBody models.Karyawan
+	if err := c.Bind(&reqBody); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
 	if err := c.Validate(&reqBody); err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, reqBody)
+
+	service.UpdateUser(reqBody, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, &models.Respons{
+		Message: "Data sukses diupdate",
+		Status:  true,
+	})
 }
 
 func AddUser(c echo.Context) error {
@@ -38,7 +63,7 @@ func AddUser(c echo.Context) error {
 		service.InsertUser(*userInsert)
 
 		return c.JSON(http.StatusCreated, &models.Respons{
-			Message: "Successfully add your account",
+			Message: "Sukses menambah user",
 			Status:  true,
 		})
 	}
@@ -48,7 +73,14 @@ func AddUser(c echo.Context) error {
 }
 
 func UserDelete(c echo.Context) error {
-	user := service.DeleteUser(c)
+	id, _ := strconv.Atoi(c.Param("id"))
 
-	return c.JSON(http.StatusOK, user)
+	var user models.Karyawan
+	service.DeleteUser(user, id)
+
+	return c.JSON(http.StatusOK, &models.Respons{
+		Message: "Sukses menghapus data",
+		Status:  true,
+	})
+
 }

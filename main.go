@@ -18,7 +18,7 @@ func main() {
 	// e.Use(middleware.CORS())
 	e := routes.Route()
 
-	e.Use(middleware.Logger())
+	e.Use(middleware.CORS())
 
 	// Mengatur validator kustom
 	// e.Validator = &utils.CustomValidator{validator: validator.New()}
