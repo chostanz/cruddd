@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"projectcrud/database"
 	"projectcrud/models"
 	"strconv"
@@ -33,8 +32,10 @@ func Getusers() ([]models.Karyawan, error) {
 func GetSpesificUser(user models.Karyawan, id int) (models.Karyawan, error) {
 	idStr := strconv.Itoa(id)
 
-	db.Get(&user, "SELECT * FROM users WHERE id = $1", idStr)
-
+	err := db.Get(&user, "SELECT * FROM users WHERE id = $1", idStr)
+	if err != nil {
+		return models.Karyawan{}, err
+	}
 	return user, nil
 }
 
@@ -68,17 +69,16 @@ func UpdateUser(reqBody models.Karyawan, id int) (models.Karyawan, error) {
 	return reqBody, nil
 }
 
-func InsertUser(userInsert models.Karyawan) models.Karyawan {
+func InsertUser(userInsert models.Karyawan) (models.Karyawan, error) {
 	// reqBody := models.Karyawan{}
 
 	// query insert pakek insert into tapi value pakek dari reqbody
 	_, err := db.NamedExec("insert into users(name, phone, address) values (:name, :phone, :address)", userInsert)
 
 	if err != nil {
-		fmt.Print(err)
-		return models.Karyawan{}
+		return models.Karyawan{}, err
 	}
-	return userInsert
+	return userInsert, nil
 }
 
 func DeleteUser(user models.Karyawan, id int) (models.Karyawan, error) {
@@ -88,6 +88,9 @@ func DeleteUser(user models.Karyawan, id int) (models.Karyawan, error) {
 	// Lakukan DELETE pada database menggunakan ID yang bertipe int
 	// hapus data dengan id tertentu
 
-	db.Exec("DELETE FROM users WHERE id = $1", idStr)
+	_, err := db.Exec("DELETE FROM users WHERE id = $1", idStr)
+	if err != nil {
+		return user, err
+	}
 	return user, nil
 }
